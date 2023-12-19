@@ -1,0 +1,152 @@
+# Item types
+@enum ItemTypes begin
+    ITEM1 = 1
+    ITEM2 = 2
+    ITEM3 = 3
+    ITEM4 = 4
+    ITEM5 = 5
+end
+
+# Transaction database
+transactions = [[ITEM1, ITEM3, ITEM4],
+                [ITEM2, ITEM4],
+                [ITEM1, ITEM2],
+                [ITEM1, ITEM2, ITEM3],
+                [ITEM5],
+                [ITEM3, ITEM4],
+                [ITEM2, ITEM3, ITEM4, ITEM5]
+                ]
+
+
+
+# Itemset (set of items)
+mutable struct Itemset
+    elements::Vector{ItemTypes}
+    transaction_relations::Vector{UInt64}
+    length::UInt64
+end
+
+function verticalize_database(transaction_database::Vector{Vector{ItemTypes}})
+    unique_items::Vector{ItemTypes} = []
+    itemsets::Vector{Itemset} = []
+
+    for transaction in transaction_database
+        for item in transaction
+            if !(item in unique_items)
+                push!(unique_items, item)
+            end
+        end
+    end
+    sort!(unique_items)
+
+    for (index, item) in enumerate(unique_items)
+        push!(itemsets, Itemset([item], [], 1))
+        for (tid, transaction) in enumerate(transaction_database)
+            
+            if item in transaction
+                push!(itemsets[index].transaction_relations, tid)
+                itemsets[index].length += 1
+            end
+        end
+    end
+
+    return itemsets
+end
+
+function vectorize_database_better(transaction_database::Vector{Vector{ItemTypes}})
+    # itemsets::Vector{ItemTypes} = []
+    # for (tid, transaction) in enumerate(transaction_database)
+    #     for (iid, item) in enumerate(transaction)
+    #         if [item] in itemsets
+    #             # Update item
+                
+    #         else
+    #             # Insert item
+    #             # insert_item!(itemsets, item)
+    #             push!(itemsets, Itemset([item], [tid], 1))
+    #         end
+    #     end
+    # end
+    # return itemsets
+end
+
+function insert_item!(itemset::Vector{Itemset}, item::Itemset)
+    push!(itemset.elements, item)
+    itemset.length += 1
+end
+
+function update_item_in_itemset!(itemset::Vector{Itemset}, index::UInt64)
+    # TODO: This should update relations of the itemset
+end
+
+function itemtype_into_uint(item::ItemTypes)::UInt64
+    if item == ITEM1
+        return 1
+    elseif item == ITEM2
+        return 2
+    elseif item == ITEM3
+        return 3
+    elseif item == ITEM4
+        return 4
+    elseif item == ITEM5
+        return 5
+    end
+    return 0
+end
+
+function find_index_itemsets(itemsets::Vector{Itemset}, itemset::Itemset)
+    # index::UInt64 = 0
+    for i in eachindex(itemsets)
+        if itemsets[i].elements == itemset.elements
+            return i
+        end
+        # index += 1
+    end
+    # return index
+    return 0
+end
+
+function itemset_union(itemset1::Itemset, itemset2::Itemset)
+    new_elements::Vector{ItemTypes} = deepcopy(itemset1.elements)
+    new_relations::Vector{UInt64} = []
+    len::UInt64 = itemset1.length
+
+    for el in itemset2.elements
+        if !(el in new_elements)
+            push!(new_elements, el)
+            len += 1
+        end
+    end
+
+    sort!(new_elements) # Optional; done just for visually prettier output
+
+    for (i, el) in enumerate(new_elements)
+        if el in itemset1.transaction_relations && el in itemset2.transaction_relations
+            push!(new_relations, i)
+        end
+    end
+
+    return Itemset(new_elements, new_relations, len)
+end
+
+function itemset_intersection(itemset1::Itemset, itemset2::Itemset)
+    new_elements::Vector{ItemTypes} = []
+    new_relations::Vector{UInt64} = []
+    tmp_itemset::Itemset = deepcopy(itemset2)
+
+    for el in itemset1.elements
+        if el in tmp_itemset.elements
+            push!(new_elements, el)
+            index_found_in_other = findfirst(==(el), tmp_itemset.elements)
+            popat!(tmp_itemset.elements, index_found_in_other)
+        end
+    end
+
+    for el in new_elements
+        if el in itemset1.transaction_relations && el in itemset2.transaction_relations
+            push!(new_relations, el)
+        end
+    end
+
+    return Itemset(new_elements, el, 0)
+end
