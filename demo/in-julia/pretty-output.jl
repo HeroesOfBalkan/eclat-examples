@@ -10,8 +10,16 @@ function show_itemsets(itemsets::Vector{Itemset})
         for transaction_id in itemset.transaction_relations
             print(transaction_id, ", ")
         end
+        println("\nItem length: $(itemset.length)")
+        println("Itemset support: $(support(itemset, transactions))")
         println()
         println()
     end
     println("************")
+end
+
+function show_itemset_elements(itemsets)
+    for itemset in itemsets
+        println(itemset.elements)
+    end
 end

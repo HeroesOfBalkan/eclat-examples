@@ -7,6 +7,9 @@
     ITEM5 = 5
 end
 
+# Minsup Threashold
+const MIN_SUP = 0.2
+
 # Transaction database
 transactions = [[ITEM1, ITEM3, ITEM4],
                 [ITEM2, ITEM4],

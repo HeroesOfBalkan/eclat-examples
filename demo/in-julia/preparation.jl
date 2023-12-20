@@ -1,7 +1,7 @@
 # itemset1, itemset2 - Itemset in transaction database
 # transaction_database - database of transactions
 
-function support(itemset1::Itemset, transaction_database::Vector)
+function support(itemset1::Itemset, transaction_database::Vector)::Number
     # |x| / |T|
     return length(itemset1.transaction_relations) / length(transaction_database)
 end
