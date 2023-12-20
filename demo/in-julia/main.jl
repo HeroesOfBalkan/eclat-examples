@@ -1,8 +1,9 @@
 include("data.jl")
 include("preparation.jl")
-
-# println(transactions)
+include("pretty-output.jl")
+include("algorithm.jl")
 
 initial_itemsets = verticalize_database(transactions)
 
-println(initial_itemsets)
+show_itemsets(initial_itemsets)
+
